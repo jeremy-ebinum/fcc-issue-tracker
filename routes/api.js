@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /*
  *
  *
@@ -111,11 +112,7 @@ module.exports = (app) => {
 
       try {
         if (!issueTitle || !issueText || !createdBy) {
-          throw new BadRequest(
-            `Missing required fields: ${!issueTitle &&
-              `issue_title`} ${!issueText && `issue_text`} ${!createdBy &&
-              `created_by`}`
-          );
+          throw new BadRequest("Missing required fields");
         }
 
         const creationDate = new Date();
@@ -151,6 +148,10 @@ module.exports = (app) => {
       } = req.body;
 
       try {
+        if (!req.body || JSON.stringify(req.body) === "{}") {
+          throw new BadRequest("No body");
+        }
+
         if (!_id) throw new BadRequest("Missing required field: _id");
 
         if (
@@ -197,17 +198,16 @@ module.exports = (app) => {
         issue.updated_on = new Date();
 
         await issue.save();
+        res.json(`successfully updated ${_id}`);
       } catch (err) {
         next(err);
       }
-
-      return res.json(`successfully updated ${_id}`);
     })
 
     .delete(async (req, res, next) => {
       const { _id } = req.body;
 
-      if (!_id) return res.json("id error");
+      if (!_id) return res.status(400).json("id error");
 
       try {
         const issue = await Issue.findById(_id);
@@ -215,10 +215,9 @@ module.exports = (app) => {
         if (!issue) return res.json(`could not delete ${_id}`);
 
         await issue.remove();
+        res.json(`deleted ${_id}`);
       } catch (err) {
         next(err);
       }
-
-      return res.json(`deleted ${_id}`);
     });
 };
