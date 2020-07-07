@@ -1,10 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-const { expect } = require("chai");
 const cors = require("cors");
-
+const helmet = require("helmet");
 const apiRoutes = require("./routes/api.js");
+const handleErrors = require("./middlewares/handleErrors");
 const fccTestingRoutes = require("./routes/fcctesting.js");
 const runner = require("./test-runner");
 
@@ -14,6 +14,7 @@ app.use("/public", express.static(`${process.cwd()}/public`));
 
 app.use(cors({ origin: "*" })); // For FCC testing purposes only
 
+app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -40,6 +41,9 @@ app.use((req, res, next) => {
     .type("text")
     .send("Not Found");
 });
+
+// Error Handling middleware
+app.use(handleErrors);
 
 // Start our server and tests!
 app.listen(process.env.PORT || 3000, () => {
